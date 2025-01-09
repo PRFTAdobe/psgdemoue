@@ -1,5 +1,5 @@
 mountpoints:
   /:
-    url: "https://author-p7752-e729659.adobeaemcloud.com/bin/franklin.delivery/prftadobe/psgdemoue/main"
+    url: "https://author-p7752-e729659.adobeaemcloud.com/bin/franklin.delivery/PRFTAdobe/psgdemoue/main"
     type: "markup"
     suffix: ".html"

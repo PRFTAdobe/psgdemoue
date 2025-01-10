@@ -18,5 +18,6 @@ export default async function decorate(block) {
   const footer = document.createElement('div');
   while (fragment.firstElementChild) footer.append(fragment.firstElementChild);
 
+  block.classList.add(...['bg-gray-900', 'mt-auto', 'text-white']);
   block.append(footer);
 }

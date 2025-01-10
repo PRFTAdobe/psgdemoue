@@ -44,12 +44,5 @@
       ]
     }
   ],
-  "filters": [
-    {
-      "id": "section",
-      "components": [
-        "logo"
-      ]
-    }
-  ]
+  "filters": []
 }

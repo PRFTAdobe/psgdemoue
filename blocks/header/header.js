@@ -187,4 +187,5 @@ export default async function decorate(block) {
   navWrapper.className = 'nav-wrapper';
   navWrapper.append(nav);
   block.append(navWrapper);
+  block.classList.add(...['bg-white', 'border-b', 'border-gray-200', 'w-full']);
 }

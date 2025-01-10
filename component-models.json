@@ -204,10 +204,10 @@
       },
       {
         "component": "text",
+        "valueType": "string",
         "name": "text",
-        "value": "",
         "label": "Brand Name",
-        "valueType": "string"
+        "value": ""
       }
     ]
   }

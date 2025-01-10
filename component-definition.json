@@ -159,7 +159,7 @@
         },
         {
           "title": "Logo",
-          "id": "lgoo",
+          "id": "logo",
           "plugins": {
             "xwalk": {
               "page": {

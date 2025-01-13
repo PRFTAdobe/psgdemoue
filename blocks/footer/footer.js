@@ -13,9 +13,9 @@ export default async function decorate(block) {
           <ul class="space-y-2">
             <li><a href="/men" class="hover:text-dsg-red">Men's</a></li>
             <li><a href="/women" class="hover:text-dsg-red">Women's</a></li>
-            <li><a href="/kid" class="hover:text-dsg-red">Kids</a></li>
+            <li><a href="/kids" class="hover:text-dsg-red">Kids</a></li>
             <li><a href="#" class="hover:text-dsg-red">New Arrivals</a></li>
-            <li><a href="#" class="hover:text-dsg-red">Sale</a></li>
+            <li><a href="/deals" class="hover:text-dsg-red">Sale</a></li>
           </ul>
         </div>
 

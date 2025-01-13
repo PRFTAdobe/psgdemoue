@@ -1,128 +1,11 @@
 import { getMetadata } from '../../scripts/aem.js';
 import { loadFragment } from '../fragment/fragment.js';
 
-// media query match that indicates mobile/tablet width
-const isDesktop = window.matchMedia('(min-width: 900px)');
-
-function closeOnEscape(e) {
-  if (e.code === 'Escape') {
-    const nav = document.getElementById('nav');
-    const navSections = nav.querySelector('.nav-sections');
-    const navSectionExpanded = navSections.querySelector(
-      '[aria-expanded="true"]',
-    );
-    if (navSectionExpanded && isDesktop.matches) {
-      // eslint-disable-next-line no-use-before-define
-      toggleAllNavSections(navSections);
-      navSectionExpanded.focus();
-    } else if (!isDesktop.matches) {
-      // eslint-disable-next-line no-use-before-define
-      toggleMenu(nav, navSections);
-      nav.querySelector('button').focus();
-    }
-  }
-}
-
-function closeOnFocusLost(e) {
-  const nav = e.currentTarget;
-  if (!nav.contains(e.relatedTarget)) {
-    const navSections = nav.querySelector('.nav-sections');
-    const navSectionExpanded = navSections.querySelector(
-      '[aria-expanded="true"]',
-    );
-    if (navSectionExpanded && isDesktop.matches) {
-      // eslint-disable-next-line no-use-before-define
-      toggleAllNavSections(navSections, false);
-    } else if (!isDesktop.matches) {
-      // eslint-disable-next-line no-use-before-define
-      toggleMenu(nav, navSections, false);
-    }
-  }
-}
-
-function openOnKeydown(e) {
-  const focused = document.activeElement;
-  const isNavDrop = focused.className === 'nav-drop';
-  if (isNavDrop && (e.code === 'Enter' || e.code === 'Space')) {
-    const dropExpanded = focused.getAttribute('aria-expanded') === 'true';
-    // eslint-disable-next-line no-use-before-define
-    toggleAllNavSections(focused.closest('.nav-sections'));
-    focused.setAttribute('aria-expanded', dropExpanded ? 'false' : 'true');
-  }
-}
-
-function focusNavSection() {
-  document.activeElement.addEventListener('keydown', openOnKeydown);
-}
-
-/**
- * Toggles all nav sections
- * @param {Element} sections The container element
- * @param {Boolean} expanded Whether the element should be expanded or collapsed
- */
-function toggleAllNavSections(sections, expanded = false) {
-  sections
-    .querySelectorAll('.nav-sections .default-content-wrapper > ul > li')
-    .forEach((section) => {
-      section.setAttribute('aria-expanded', expanded);
-    });
-}
-
-/**
- * Toggles the entire nav
- * @param {Element} nav The container element
- * @param {Element} navSections The nav sections within the container element
- * @param {*} forceExpanded Optional param to force nav expand behavior when not null
- */
-function toggleMenu(nav, navSections, forceExpanded = null) {
-  const expanded =
-    forceExpanded !== null
-      ? !forceExpanded
-      : nav.getAttribute('aria-expanded') === 'true';
-  const button = nav.querySelector('.nav-hamburger button');
-  document.body.style.overflowY = expanded || isDesktop.matches ? '' : 'hidden';
-  nav.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-  toggleAllNavSections(
-    navSections,
-    expanded || isDesktop.matches ? 'false' : 'true',
-  );
-  button.setAttribute(
-    'aria-label',
-    expanded ? 'Open navigation' : 'Close navigation',
-  );
-  // enable nav dropdown keyboard accessibility
-  const navDrops = navSections.querySelectorAll('.nav-drop');
-  if (isDesktop.matches) {
-    navDrops.forEach((drop) => {
-      if (!drop.hasAttribute('tabindex')) {
-        drop.setAttribute('tabindex', 0);
-        drop.addEventListener('focus', focusNavSection);
-      }
-    });
-  } else {
-    navDrops.forEach((drop) => {
-      drop.removeAttribute('tabindex');
-      drop.removeEventListener('focus', focusNavSection);
-    });
-  }
-
-  // enable menu collapse on escape keypress
-  if (!expanded || isDesktop.matches) {
-    // collapse menu on escape press
-    window.addEventListener('keydown', closeOnEscape);
-    // collapse menu on focus lost
-    nav.addEventListener('focusout', closeOnFocusLost);
-  } else {
-    window.removeEventListener('keydown', closeOnEscape);
-    nav.removeEventListener('focusout', closeOnFocusLost);
-  }
-}
-
 /**
  * loads and decorates the header, mainly the nav
  * @param {Element} block The header block element
  */
-export default async function decorate(block) {
+const decorateHeader = async (block) => {
   // load nav as fragment
   const navMeta = getMetadata('nav');
   const navPath = navMeta ? new URL(navMeta, window.location).pathname : '/nav';
@@ -130,62 +13,312 @@ export default async function decorate(block) {
 
   // decorate nav DOM
   block.textContent = '';
-  const nav = document.createElement('nav');
-  nav.id = 'nav';
-  while (fragment.firstElementChild) nav.append(fragment.firstElementChild);
 
-  const classes = ['brand', 'sections', 'tools'];
-  classes.forEach((c, i) => {
-    const section = nav.children[i];
-    if (section) section.classList.add(`nav-${c}`);
+  const container = document.createElement('div');
+  container.classList.add(...['container', 'mx-auto', 'px-4', 'py-4']);
+
+  const containerInner = document.createElement('div');
+  containerInner.classList.add(...['flex', 'items-center', 'justify-between']);
+  while (fragment.firstElementChild) {
+    containerInner.append(fragment.firstElementChild);
+  }
+
+  const classes = ['brand', 'sections'];
+  classes.forEach((className, index) => {
+    const section = containerInner.children[index];
+    if (section) {
+      section.classList.add(`nav-${className}`);
+
+      if (index === 1) {
+        section.classList.add(
+          ...['hidden', 'md:flex', 'items-center', 'space-x-8'],
+        );
+      }
+    }
   });
 
-  const navBrand = nav.querySelector('.nav-brand');
-  const brandLink = navBrand.querySelector('.button');
-  if (brandLink) {
-    brandLink.className = '';
-    brandLink.closest('.button-container').className = '';
-  }
+  const navSections = containerInner.querySelector('.nav-sections');
+  const navigation = document.createElement('nav');
 
-  const navSections = nav.querySelector('.nav-sections');
   if (navSections) {
-    navSections
-      .querySelectorAll(':scope .default-content-wrapper > ul > li')
-      .forEach((navSection) => {
-        if (navSection.querySelector('ul'))
-          navSection.classList.add('nav-drop');
-        navSection.addEventListener('click', () => {
-          if (isDesktop.matches) {
-            const expanded =
-              navSection.getAttribute('aria-expanded') === 'true';
-            toggleAllNavSections(navSections);
-            navSection.setAttribute(
-              'aria-expanded',
-              expanded ? 'false' : 'true',
-            );
-          }
-        });
+    const defaultContentWrapper = navSections.querySelector(
+      '.default-content-wrapper',
+    );
+    if (defaultContentWrapper) {
+      const unorderedList = defaultContentWrapper.querySelector('ul');
+      unorderedList.classList.add(...['flex', 'space-x-6']);
+
+      const anchorLinks = defaultContentWrapper.querySelectorAll('a');
+      Array.from(anchorLinks).forEach((anchorLink) => {
+        anchorLink.classList.add(...['hover:text-dsg-red']);
       });
+
+      while (defaultContentWrapper.firstChild) {
+        navigation.appendChild(defaultContentWrapper.firstChild);
+      }
+      navSections.removeChild(defaultContentWrapper);
+      navSections.appendChild(navigation);
+    }
   }
 
-  // hamburger for mobile
-  const hamburger = document.createElement('div');
-  hamburger.classList.add('nav-hamburger');
-  hamburger.innerHTML = `<button type="button" aria-controls="nav" aria-label="Open navigation">
-      <span class="nav-hamburger-icon"></span>
-    </button>`;
-  hamburger.addEventListener('click', () => toggleMenu(nav, navSections));
-  nav.prepend(hamburger);
-  nav.setAttribute('aria-expanded', 'false');
-  // prevent mobile nav behavior on window resize
-  toggleMenu(nav, navSections, isDesktop.matches);
-  isDesktop.addEventListener('change', () =>
-    toggleMenu(nav, navSections, isDesktop.matches),
+  const navTools = document.createElement('div');
+  navTools.classList.add(
+    ...['flex', 'items-center', 'md:space-x-4', 'space-x-2'],
   );
 
-  const navWrapper = document.createElement('div');
-  navWrapper.className = 'nav-wrapper';
-  navWrapper.append(nav);
-  block.append(navWrapper);
+  const buttonClassList = [
+    '[&_svg]:pointer-events-none',
+    '[&_svg]:shrink-0',
+    '[&_svg]:size-4',
+    'disabled:opacity-50',
+    'disabled:pointer-events-none',
+    'focus-visible:outline-none',
+    'focus-visible:ring-2',
+    'focus-visible:ring-offset-2',
+    'focus-visible:ring-ring',
+    'font-medium',
+    'gap-2',
+    'h-10',
+    'hover:bg-accent',
+    'hover:text-accent-foreground',
+    'inline-flex',
+    'items-center',
+    'justify-center',
+    'ring-offset-background',
+    'rounded-md',
+    'text-sm',
+    'transition-colors',
+    'w-10',
+    'whitespace-nowrap',
+  ];
+
+  const searchButton = document.createElement('button');
+  searchButton.classList.add(...buttonClassList, ...['relative']);
+  searchButton.setAttribute('type', 'button');
+  searchButton.setAttribute('aria-haspopup', 'dialog');
+  searchButton.setAttribute('aria-expanded', 'false');
+  searchButton.setAttribute('aria-controls', 'radix-:r0:');
+
+  const searchIcon = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'svg',
+  );
+  searchIcon.setAttribute('height', '24');
+  searchIcon.setAttribute('width', '24');
+  searchIcon.setAttribute('viewBox', '0 0 24 24');
+  searchIcon.setAttribute('fill', 'none');
+  searchIcon.setAttribute('stroke', 'currentColor');
+  searchIcon.setAttribute('stroke-linecap', 'round');
+  searchIcon.setAttribute('stroke-linejoin', 'round');
+  searchIcon.setAttribute('stroke-width', '2');
+  searchIcon.classList.add(...['lucide', 'lucide-search', 'h-5', 'w-5']);
+
+  const searchCircle = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'circle',
+  );
+  searchCircle.setAttribute('cx', '11');
+  searchCircle.setAttribute('cy', '11');
+  searchCircle.setAttribute('r', '8');
+
+  const searchPath = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'path',
+  );
+  searchPath.setAttribute('d', 'm21 21-4.3-4.3');
+
+  searchIcon.append(searchCircle);
+  searchIcon.append(searchPath);
+
+  searchButton.append(searchIcon);
+
+  const accountButton = document.createElement('button');
+  accountButton.classList.add(...buttonClassList, ...['relative']);
+  accountButton.setAttribute('type', 'button');
+
+  const accountIcon = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'svg',
+  );
+  accountIcon.setAttribute('height', '24');
+  accountIcon.setAttribute('width', '24');
+  accountIcon.setAttribute('viewBox', '0 0 24 24');
+  accountIcon.setAttribute('fill', 'none');
+  accountIcon.setAttribute('stroke', 'currentColor');
+  accountIcon.setAttribute('stroke-linecap', 'round');
+  accountIcon.setAttribute('stroke-linejoin', 'round');
+  accountIcon.setAttribute('stroke-width', '2');
+  accountIcon.classList.add(...['lucide', 'lucide-user', 'h-5', 'w-5']);
+
+  const accountPath = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'path',
+  );
+  accountPath.setAttribute('d', 'M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2');
+
+  const accountCircle = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'circle',
+  );
+  accountCircle.setAttribute('cx', '12');
+  accountCircle.setAttribute('cy', '7');
+  accountCircle.setAttribute('r', '4');
+
+  accountIcon.append(accountPath);
+  accountIcon.append(accountCircle);
+
+  accountButton.append(accountIcon);
+
+  const cartButton = document.createElement('button');
+
+  cartButton.classList.add(...buttonClassList, ...['relative']);
+  cartButton.setAttribute('type', 'button');
+
+  const cartIcon = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'svg',
+  );
+  cartIcon.setAttribute('height', '24');
+  cartIcon.setAttribute('width', '24');
+  cartIcon.setAttribute('viewBox', '0 0 24 24');
+  cartIcon.setAttribute('fill', 'none');
+  cartIcon.setAttribute('stroke', 'currentColor');
+  cartIcon.setAttribute('stroke-linecap', 'round');
+  cartIcon.setAttribute('stroke-linejoin', 'round');
+  cartIcon.setAttribute('stroke-width', '2');
+
+  cartIcon.classList.add(...['lucide', 'lucide-shopping-cart', 'h-5', 'w-5']);
+
+  const cartCircleOne = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'circle',
+  );
+  cartCircleOne.setAttribute('cx', '8');
+  cartCircleOne.setAttribute('cy', '21');
+  cartCircleOne.setAttribute('r', '1');
+
+  const cartCircleTwo = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'circle',
+  );
+  cartCircleTwo.setAttribute('cx', '19');
+  cartCircleTwo.setAttribute('cy', '21');
+  cartCircleTwo.setAttribute('r', '1');
+
+  const cartPath = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'path',
+  );
+  cartPath.setAttribute(
+    'd',
+    'M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12',
+  );
+
+  cartIcon.append(cartCircleOne);
+  cartIcon.append(cartCircleTwo);
+  cartIcon.append(cartPath);
+
+  cartButton.append(cartIcon);
+
+  const containerMobile = document.createElement('div');
+  containerMobile.classList.add(...['hidden', 'mt-4', 'pb-4']);
+
+  const hamburgerButton = document.createElement('button');
+
+  hamburgerButton.classList.add(...buttonClassList, ...['md:hidden']);
+  hamburgerButton.setAttribute('type', 'button');
+
+  const hamburgerIcon = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'svg',
+  );
+  hamburgerIcon.setAttribute('height', '24');
+  hamburgerIcon.setAttribute('width', '24');
+  hamburgerIcon.setAttribute('viewBox', '0 0 24 24');
+  hamburgerIcon.setAttribute('fill', 'none');
+  hamburgerIcon.setAttribute('stroke', 'currentColor');
+  hamburgerIcon.setAttribute('stroke-linecap', 'round');
+  hamburgerIcon.setAttribute('stroke-linejoin', 'round');
+  hamburgerIcon.setAttribute('stroke-width', '2');
+
+  hamburgerIcon.classList.add(...['lucide', 'lucide-menu', 'h-5', 'w-5']);
+
+  const hamburgerLineOne = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'line',
+  );
+  hamburgerLineOne.setAttribute('x1', '4');
+  hamburgerLineOne.setAttribute('x2', '20');
+  hamburgerLineOne.setAttribute('y1', '12');
+  hamburgerLineOne.setAttribute('y2', '12');
+
+  const hamburgerLineTwo = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'line',
+  );
+  hamburgerLineTwo.setAttribute('x1', '4');
+  hamburgerLineTwo.setAttribute('x2', '20');
+  hamburgerLineTwo.setAttribute('y1', '6');
+  hamburgerLineTwo.setAttribute('y2', '6');
+
+  const hamburgerLineThree = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'line',
+  );
+  hamburgerLineThree.setAttribute('x1', '4');
+  hamburgerLineThree.setAttribute('x2', '20');
+  hamburgerLineThree.setAttribute('y1', '18');
+  hamburgerLineThree.setAttribute('y2', '18');
+
+  hamburgerIcon.append(hamburgerLineOne, hamburgerLineTwo, hamburgerLineThree);
+  hamburgerButton.append(hamburgerIcon);
+
+  hamburgerButton.addEventListener('click', () => {
+    if (containerMobile.classList.contains('hidden')) {
+      containerMobile.classList.remove('hidden');
+      containerMobile.classList.add('md:hidden');
+    } else {
+      containerMobile.classList.remove('md:hidden');
+      containerMobile.classList.add('hidden');
+    }
+  });
+
+  const searchButtonWrapper = document.createElement('div');
+  searchButtonWrapper.classList.add(...['hidden', 'md:block']);
+
+  searchButtonWrapper.append(searchButton);
+  navTools.append(searchButtonWrapper);
+  navTools.append(accountButton);
+  navTools.append(cartButton);
+  navTools.append(hamburgerButton);
+
+  containerInner.append(navTools);
+
+  const navMobile = document.createElement('div');
+  navMobile.classList.add(...['space-y-4']);
+
+  const searchButtonWrapperMobile = document.createElement('div');
+  searchButtonWrapperMobile.classList.add(...['mb-4']);
+  searchButtonWrapperMobile.append(searchButton.cloneNode(true));
+
+  const mobileNavigation = navigation.firstChild.cloneNode(true);
+  mobileNavigation.classList.remove('space-x-6');
+  mobileNavigation.classList.add(...['flex-col', 'space-y-2']);
+
+  const mobileAnchorLinks = mobileNavigation.querySelectorAll('a');
+  Array.from(mobileAnchorLinks).forEach((mobileAnchorLink) => {
+    mobileAnchorLink.classList.add(...['block', 'py-2']);
+  });
+
+  navMobile.append(searchButtonWrapperMobile, mobileNavigation);
+
+  searchButtonWrapper.append(searchButton);
+
+  containerMobile.append(navMobile);
+
+  container.append(containerInner, containerMobile);
+  block.append(container);
   block.classList.add(...['bg-white', 'border-b', 'border-gray-200', 'w-full']);
-}
+};
+
+export default decorateHeader;

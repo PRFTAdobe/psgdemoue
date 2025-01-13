@@ -70,7 +70,7 @@ export default async function decorate(block) {
       <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
         <p>&copy; ${new Date().getFullYear()} PSG Sports. All rights reserved.</p>
       </div>
-    </div>`
+    </div>`;
 
   block.classList.add(...['bg-gray-900', 'mt-auto', 'text-white']);
 }

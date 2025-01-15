@@ -846,6 +846,11 @@ h1, h2, h3, h4, h5, h6 {
   border-color: rgb(31 41 55 / var(--tw-border-opacity, 1));
 }
 
+.bg-dsg-red {
+  --tw-bg-opacity: 1;
+  background-color: rgb(204 31 32 / var(--tw-bg-opacity, 1));
+}
+
 .bg-gray-900 {
   --tw-bg-opacity: 1;
   background-color: rgb(17 24 39 / var(--tw-bg-opacity, 1));
@@ -854,11 +859,6 @@ h1, h2, h3, h4, h5, h6 {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
-}
-
-.bg-dsg-red {
-  --tw-bg-opacity: 1;
-  background-color: rgb(204 31 32 / var(--tw-bg-opacity, 1));
 }
 
 .object-cover {

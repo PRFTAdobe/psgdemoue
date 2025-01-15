@@ -182,6 +182,22 @@
         "value": "",
         "label": "Text",
         "valueType": "string"
+      },
+      {
+        "component": "multiselect",
+        "name": "heroBlockSize",
+        "label": "Hero Block Size",
+        "valueType": "string",
+        "options": [
+          {
+            "name": "400 pixels",
+            "value": "400"
+          },
+          {
+            "name": "500 pixels",
+            "value": "800"
+          }
+        ]
       }
     ]
   },

@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import tailwindcssAnimate from 'tailwindcss-animate';
 
 /** @type {import("tailwindcss").Config} */

@@ -184,7 +184,7 @@
         "valueType": "string"
       },
       {
-        "component": "multiselect",
+        "component": "select",
         "name": "heroBlockSize",
         "label": "Hero Block Size",
         "valueType": "string",

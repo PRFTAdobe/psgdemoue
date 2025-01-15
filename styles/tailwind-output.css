@@ -724,10 +724,6 @@ h1, h2, h3, h4, h5, h6 {
   height: 2rem;
 }
 
-.h-\[500px\] {
-  height: 500px;
-}
-
 .w-10 {
   width: 2.5rem;
 }
@@ -968,6 +964,14 @@ h1, h2, h3, h4, h5, h6 {
     opacity: var(--tw-exit-opacity, 1);
     transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1)) rotate(var(--tw-exit-rotate, 0));
   }
+}
+
+.h-\[400px\] {
+  height: 400px;
+}
+
+.h-\[500px\] {
+  height: 500px;
 }
 
 .before\:absolute::before {

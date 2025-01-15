@@ -45,7 +45,7 @@
           "component": "select",
           "name": "heroBlockSize",
           "label": "Hero Block Size",
-          "valueType": "string",
+          "valueType": "number",
           "options": [
             {
               "name": "400 pixels",

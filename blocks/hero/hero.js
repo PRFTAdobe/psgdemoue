@@ -6,6 +6,7 @@ const decorateHero = async (block) => {
   }
 
   let imageSize = 500;
+  let overlayTransparency = 40;
 
   if (grandChildren) {
     const grandChildrenAsArray = Array.from(grandChildren);
@@ -17,6 +18,9 @@ const decorateHero = async (block) => {
     if (grandChildImageSize) {
       const paragraph = grandChildImageSize.querySelector('p');
       imageSize = parseInt(paragraph.textContent, 10);
+      if (imageSize !== 500) {
+        overlayTransparency = 20;
+      }
     }
 
     if (grandChildImage) {
@@ -31,7 +35,7 @@ const decorateHero = async (block) => {
           "before:content-['']",
           'absolute',
           'before:absolute',
-          'before:bg-black/40',
+          `before:bg-black/${overlayTransparency}`,
           'before:inset-0',
           'inset-0',
         ],
@@ -44,7 +48,15 @@ const decorateHero = async (block) => {
       contentWrapper.classList.add(
         ...['container', 'mx-auto', 'px-4', 'relative', 'z-10'],
       );
-      grandChildContent.classList.add(...['max-w-xl']);
+
+      const buttonContainers =
+        grandChildContent.querySelectorAll('.button-container');
+
+      if (buttonContainers.length) {
+        grandChildContent.classList.add(...['max-w-xl']);
+      } else {
+        grandChildContent.classList.add(...['max-w-2xl']);
+      }
 
       const headingOne = grandChildContent.querySelector('h1, h2, h3');
       if (headingOne) {
@@ -56,12 +68,14 @@ const decorateHero = async (block) => {
       const paragraphs = grandChildContent.querySelectorAll('p');
       Array.from(paragraphs).forEach((paragraph) => {
         if (!paragraph.classList.contains('button-container')) {
-          paragraph.classList.add(...['mb-6', 'text-xl', 'text-white']);
+          const paragraphClassList = ['text-xl', 'text-white'];
+          if (buttonContainers.length) {
+            paragraphClassList.push('mb-6');
+          }
+          paragraph.classList.add(...paragraphClassList);
         }
       });
 
-      const buttonContainers =
-        grandChildContent.querySelectorAll('.button-container');
       Array.from(buttonContainers).forEach((buttonContainer) => {
         const anchor = buttonContainer.querySelector('a');
         anchor.classList.add(

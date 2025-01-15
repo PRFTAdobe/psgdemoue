@@ -85,3 +85,13 @@
 .h-\[500px\] {
     height: 500px;
 }
+
+.before\:bg-black\/20::before {
+    content: var(--tw-content);
+    background-color: rgb(0 0 0 / 20%);
+}
+
+.before\:bg-black\/40::before {
+    content: var(--tw-content);
+    background-color: rgb(0 0 0 / 40%);
+}

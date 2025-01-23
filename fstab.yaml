@@ -1,5 +1,5 @@
 mountpoints:
-  /:
+  /: https://drive.google.com/drive/folders/1j0Itzr7GG8eHA3u-ESyasFye3NkaM5PX
     url: "https://author-p7752-e729659.adobeaemcloud.com/bin/franklin.delivery/PRFTAdobe/psgdemoue/main"
     type: "markup"
     suffix: ".html"
